@@ -1,17 +1,20 @@
-import { Static, Type } from "@sinclair/typebox";
+import { Static, Type } from '@sinclair/typebox'
+import { SAFE_STRING_PATTERN } from '../../common'
+import { ApId } from '../../common/id-generator'
+import { EmailType, PasswordType } from '../../user/user'
 
 export const SignUpRequest = Type.Object({
-    email: Type.String({
-        format: 'email',
+    email: EmailType,
+    password: PasswordType,
+    firstName: Type.String({
+        pattern: SAFE_STRING_PATTERN,
     }),
-    password: Type.String({
-        minLength: 8,
-        maxLength: 64,
+    lastName: Type.String({
+        pattern: SAFE_STRING_PATTERN,
     }),
-    firstName: Type.String(),
-    lastName: Type.String(),
     trackEvents: Type.Boolean(),
     newsLetter: Type.Boolean(),
-});
+    referringUserId: Type.Optional(ApId),
+})
 
-export type SignUpRequest = Static<typeof SignUpRequest>;
+export type SignUpRequest = Static<typeof SignUpRequest>

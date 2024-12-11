@@ -1,6 +1,14 @@
 {
     "cSpell.words": [
-        "mpim"
+        "Activepieces",
+        "Fastify",
+        "mpim",
+        "sendgrid"
     ],
-    "typescript.preferences.importModuleSpecifier": "relative"
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.formatOnSave": false,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "javascript.preferences.importModuleSpecifier": "relative",
 }

@@ -1,12 +1,14 @@
-import {BaseModel} from "../common/base-model";
-import {ApId} from "../common/id-generator";
-import {CollectionId} from "../collections/collection";
+import { BaseModel } from '../common/base-model'
+import { ApId } from '../common/id-generator'
+import { ProjectId } from '../project/project'
 
-export type StoreEntryId = ApId;
+export type StoreEntryId = ApId
 
+export const STORE_KEY_MAX_LENGTH = 128
+export const STORE_VALUE_MAX_SIZE = 512 * 1024
 
-export interface StoreEntry extends BaseModel<StoreEntryId> {
-    key: string;
-    collectionId: CollectionId,
-    value: unknown;
-}
+export type StoreEntry = {
+    key: string
+    projectId: ProjectId
+    value: unknown
+} & BaseModel<StoreEntryId>

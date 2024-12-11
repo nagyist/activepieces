@@ -1,21 +1,40 @@
-import {BaseModel} from "../common/base-model";
-import {FlowId} from "./flow";
-import {ApId} from "../common/id-generator";
-import {Trigger} from "./triggers/trigger";
+import { Static, Type } from '@sinclair/typebox'
+import { BaseModelSchema, Nullable } from '../common/base-model'
+import { ApId } from '../common/id-generator'
+import { UserMeta } from '../user'
+import { Trigger } from './triggers/trigger'
 
-export type FlowVersionId = ApId;
+export type FlowVersionId = ApId
 
-export interface FlowVersion extends BaseModel<FlowVersionId> {
-
-  flowId: FlowId;
-  displayName: string;
-  trigger: Trigger;
-  valid: boolean;
-  state: FlowVersionState;
-
-}
+export const LATEST_SCHEMA_VERSION = '1'
 
 export enum FlowVersionState {
-  LOCKED = "LOCKED",
-  DRAFT = "DRAFT"
+    LOCKED = 'LOCKED',
+    DRAFT = 'DRAFT',
 }
+
+export const FlowVersion = Type.Object({
+    ...BaseModelSchema,
+    flowId: Type.String(),
+    displayName: Type.String(),
+    trigger: Trigger,
+    updatedBy: Nullable(Type.String()),
+    valid: Type.Boolean(),
+    schemaVersion: Nullable(Type.String()),
+    state: Type.Enum(FlowVersionState),
+})
+
+export type FlowVersion = Static<typeof FlowVersion>
+
+export const FlowVersionMetadata = Type.Object({
+    ...BaseModelSchema,
+    flowId: Type.String(),
+    displayName: Type.String(),
+    valid: Type.Boolean(),
+    state: Type.Enum(FlowVersionState),
+    updatedBy: Nullable(Type.String()),
+    schemaVersion: Nullable(Type.String()),
+    updatedByUser: Nullable(UserMeta),
+})
+
+export type FlowVersionMetadata = Static<typeof FlowVersionMetadata>

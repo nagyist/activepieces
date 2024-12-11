@@ -1,20 +1,36 @@
-import { ApId } from '../../common/id-generator';
-import { PrincipalType } from './principal-type';
-import {CollectionId} from "../../collections/collection";
-import { ProjectId } from '../../project/project';
+import { ApId } from '../../common/id-generator'
+import { PlatformId } from '../../platform'
+import { ProjectId } from '../../project/project'
+import { WorkerMachineType } from '../../workers'
+import { PrincipalType } from './principal-type'
 
-export type Principal = WorkerPrincipal | UserPrincipal;
-
-export interface UserPrincipal extends BasePrincipal<PrincipalType.USER>{
-    projectId: ProjectId;
+export type Principal = {
+    id: ApId
+    type: PrincipalType
+    projectId: ProjectId
+    platform: {
+        id: ApId
+    }
+    tokenVersion?: string
 }
 
-export interface WorkerPrincipal extends BasePrincipal<PrincipalType.WORKER>{
-    collectionId: CollectionId;
-    projectId: ProjectId;
+export type WorkerPrincipal = {
+    id: ApId
+    type: PrincipalType.WORKER
+    platform: {
+        id: ApId
+    } | null
+    worker: {
+        type: WorkerMachineType
+    }
 }
 
-interface BasePrincipal<T>{
-    id: ApId,
-    type: T
+export type EnginePrincipal = {
+    id: ApId
+    type: PrincipalType.ENGINE
+    queueToken: string | undefined
+    projectId: ProjectId | undefined
+    platform: {
+        id: PlatformId
+    }
 }

@@ -1,103 +1,50 @@
-import { FlowExecutor } from './lib/executors/flow-executor';
-import { Utils } from './lib/utils';
-import { globals } from './lib/globals';
+import { argv } from 'process'
+import { parentPort } from 'worker_threads'
 import {
-  EngineOperationType,
-  ExecutePropsOptions,
-  ExecuteFlowOperation,
-  ExecuteTriggerOperation,
-  ExecutionState,
-  ExecuteEventParserOperation,
-} from '@activepieces/shared';
-import { pieceHelper } from './lib/helper/piece-helper';
-import { triggerHelper } from './lib/helper/trigger-helper';
+    assertNotNullOrUndefined,
+    EngineOperation,
+    EngineOperationType,
+} from '@activepieces/shared'
+import { EngineConstants } from './lib/handler/context/engine-constants'
+import { execute } from './lib/operations'
+import { utils } from './lib/utils'
 
-const args = process.argv.slice(2);
-
-const executeFlow = async (): Promise<void> => {
-  try {
-    const input: ExecuteFlowOperation = Utils.parseJsonFile(globals.inputFile);
-
-    globals.workerToken = input.workerToken!;
-    globals.projectId = input.projectId;
-    globals.apiUrl = input.apiUrl!;
-
-    const executionState = new ExecutionState();
-    executionState.insertStep(input.triggerPayload!, 'trigger', []);
-    const executor = new FlowExecutor(executionState);
-    const output = await executor.executeFlow(input.flowVersionId);
-    Utils.writeToJsonFile(globals.outputFile, output);
-  } catch (e) {
-    console.error(e);
-    Utils.writeToJsonFile(globals.outputFile, (e as Error).message);
-  }
+async function executeFromFile(operationType: string): Promise<void> {
+    const input: EngineOperation = await utils.parseJsonFile(EngineConstants.INPUT_FILE)
+    const operationTypeCasted = operationType as EngineOperationType
+    const result = await execute(operationTypeCasted, input)
+    await utils.writeToJsonFile(EngineConstants.OUTPUT_FILE, result)
 }
 
-const executeProps = async (): Promise<void> => {
-  try {
-    const input: ExecutePropsOptions = Utils.parseJsonFile(globals.inputFile);
-
-    globals.workerToken = input.workerToken!;
-    globals.projectId = input.projectId;
-    globals.apiUrl = input.apiUrl!;
-
-    const output = await pieceHelper.executeProps(input);
-    Utils.writeToJsonFile(globals.outputFile, output);
-  }
-  catch (e) {
-    console.error(e);
-    Utils.writeToJsonFile(globals.outputFile, (e as Error).message);
-  }
+async function executeFromWorkerData(operation: EngineOperation, operationType: EngineOperationType): Promise<void> {
+    const result = await execute(operationType, operation)
+    assertNotNullOrUndefined(parentPort, 'parentPort')
+    const resultParsed = JSON.parse(JSON.stringify(result))
+    parentPort.postMessage({ type: 'result', message: resultParsed })
 }
 
-const executeEventParser = async (): Promise<void> => {
-  const input: ExecuteEventParserOperation = Utils.parseJsonFile(globals.inputFile);
+const operationType = argv[2]
 
-  try {
-    const output = await triggerHelper.executeEventParser(input)
-    Utils.writeToJsonFile(globals.outputFile, output);
-  }
-  catch(e) {
-    console.error(e);
-    Utils.writeToJsonFile(globals.outputFile, (e as Error).message);
-  }
+if (operationType) {
+    executeFromFile(operationType).catch(e => console.error(e))
 }
+else {
+    if (parentPort) {
+        const originalLog = console.log
+        console.log = function (...args) {
+            assertNotNullOrUndefined(parentPort, 'parentPort')
+            parentPort.postMessage({ type: 'stdout', message: args.join(' ') })
+            originalLog.apply(console, args)
+        }
 
-const executeTrigger = async (): Promise<void> => {
-  try {
-    const input: ExecuteTriggerOperation = Utils.parseJsonFile(globals.inputFile);
-
-    globals.workerToken = input.workerToken!;
-    globals.projectId = input.projectId;
-    globals.apiUrl = input.apiUrl!;
-
-    const output = await triggerHelper.executeTrigger(input);
-    Utils.writeToJsonFile(globals.outputFile, output ?? "");
-  }
-  catch (e) {
-    console.error(e);
-    Utils.writeToJsonFile(globals.outputFile, (e as Error).message);
-  }
+        const originalError = console.error
+        console.error = function (...args) {
+            assertNotNullOrUndefined(parentPort, 'parentPort')
+            parentPort.postMessage({ type: 'stderr', message: args.join(' ') })
+            originalError.apply(console, args)
+        }
+        parentPort.on('message', (m: { operation: EngineOperation, operationType: EngineOperationType }) => {
+            executeFromWorkerData(m.operation, m.operationType).catch(e => console.error(e))
+        })
+    }
 }
-
-async function execute() {
-  switch (args[0]) {
-    case EngineOperationType.EXECUTE_FLOW:
-      executeFlow();
-      break;
-    case EngineOperationType.EXTRACT_EVENT_DATA:
-      executeEventParser();
-      break;
-    case EngineOperationType.EXECUTE_PROPERTY:
-      executeProps();
-      break;
-    case EngineOperationType.EXECUTE_TRIGGER_HOOK:
-      executeTrigger();
-      break;
-    default:
-      console.error('unknown operation');
-      break;
-  }
-}
-
-execute();

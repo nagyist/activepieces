@@ -11,11 +11,15 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
-				"dbaeumer.vscode-eslint"
+				"dbaeumer.vscode-eslint",
+				"Angular.ng-template",
+				"cipchk.cssrem",
+				"huizhou.githd",
+				"supermaven.supermaven"
 			]
 		}
 	},
-	"forwardPorts": [3000, 4200],
+	"forwardPorts": [3000, 4200, 5432],
 	"postAttachCommand": "/bin/bash .devcontainer/setup.sh",
 	"hostRequirements": {
   	  "cpus": 4,

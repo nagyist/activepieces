@@ -1,6 +1,8 @@
-import { User } from "../../user/user";
+import { User } from '../../user/user'
 
-export type AuthenticationResponse = Omit<User, "password"> & {
-    token: string;
-    projectId: string;
-};
+export type UserWithoutPassword = Omit<User, 'password'>
+
+export type AuthenticationResponse = UserWithoutPassword & {
+    token: string
+    projectId: string
+}

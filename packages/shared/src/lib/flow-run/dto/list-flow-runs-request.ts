@@ -1,10 +1,16 @@
-import {Cursor} from "../../common/seek-page";
-import { Static, Type } from "@sinclair/typebox";
+import { Static, Type } from '@sinclair/typebox'
+import { ApId } from '../../common/id-generator'
+import { FlowRunStatus } from '../execution/flow-execution'
 
-export const ListFlowRunsRequest = Type.Object({
+export const ListFlowRunsRequestQuery = Type.Object({
+    flowId: Type.Optional(Type.Array(ApId)),
+    tags: Type.Optional(Type.Array(Type.String({}))),
+    status: Type.Optional(Type.Array(Type.Enum(FlowRunStatus))),
     limit: Type.Optional(Type.Number({})),
     cursor: Type.Optional(Type.String({})),
-});
+    createdAfter: Type.Optional(Type.String({})),
+    createdBefore: Type.Optional(Type.String({})),
+    projectId: ApId,
+})
 
-export type ListFlowRunsRequest = Static<typeof ListFlowRunsRequest> & {cursor: Cursor};
-
+export type ListFlowRunsRequestQuery = Static<typeof ListFlowRunsRequestQuery>
