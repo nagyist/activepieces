@@ -20,6 +20,8 @@ import { RedirectPage } from '@/app/routes/redirect';
 import { ProjectPiecesPage } from '@/app/routes/settings/pieces';
 import { useEmbedding } from '@/components/embed-provider';
 import { VerifyEmail } from '@/features/authentication/components/verify-email';
+import { Error } from '@/features/billing/components/error';
+import { Success } from '@/features/billing/components/success';
 import { AcceptInvitation } from '@/features/team/component/accept-invitation';
 import { Permission } from '@activepieces/shared';
 
@@ -28,8 +30,7 @@ import { DashboardContainer } from '../components/dashboard-container';
 import { PlatformAdminContainer } from '../components/platform-admin-container';
 import ProjectSettingsLayout from '../components/project-settings-layout';
 import NotFoundPage from '../routes/404-page';
-import { ApTablesPage } from '../routes/ap-tables';
-import { ApTableEditorPage } from '../routes/ap-tables/id';
+import { AgentsPage } from '../routes/agents';
 import AuthenticatePage from '../routes/authenticate';
 import { ChangePasswordPage } from '../routes/change-password';
 import { AppConnectionsPage } from '../routes/connections';
@@ -56,12 +57,12 @@ import { ProjectReleasesPage } from '../routes/project-release';
 import ViewRelease from '../routes/project-release/view-release';
 import { FlowRunPage } from '../routes/runs/id';
 import AlertsPage from '../routes/settings/alerts';
-import AppearancePage from '../routes/settings/appearance';
 import { EnvironmentPage } from '../routes/settings/environment';
-import GeneralPage from '../routes/settings/general';
 import TeamPage from '../routes/settings/team';
 import { SignInPage } from '../routes/sign-in';
 import { SignUpPage } from '../routes/sign-up';
+import { ApTablesPage } from '../routes/tables';
+import { ApTableEditorPage } from '../routes/tables/id';
 import { ShareTemplatePage } from '../routes/templates/share-template';
 import { TodosPage } from '../routes/todos';
 import { TodoTestingPage } from '../routes/todos/id';
@@ -81,7 +82,7 @@ const SettingsRerouter = () => {
   return fragmentWithoutHash ? (
     <Navigate to={`/settings/${fragmentWithoutHash}`} replace />
   ) : (
-    <Navigate to="/settings/general" replace />
+    <Navigate to="/settings/team" replace />
   );
 };
 
@@ -132,6 +133,16 @@ const routes = [
       </PageTitle>
     ),
   },
+  ...ProjectRouterWrapper({
+    path: '/agents',
+    element: (
+      <DashboardContainer>
+        <PageTitle title="Agents">
+          <AgentsPage />
+        </PageTitle>
+      </DashboardContainer>
+    ),
+  }),
   {
     path: '/chats/:flowId',
     element: (
@@ -320,30 +331,7 @@ const routes = [
       </DashboardContainer>
     ),
   }),
-  ...ProjectRouterWrapper({
-    path: projectSettingsRoutes.appearance,
-    element: (
-      <DashboardContainer>
-        <PageTitle title="Appearance">
-          <ProjectSettingsLayout>
-            <AppearancePage />
-          </ProjectSettingsLayout>
-        </PageTitle>
-      </DashboardContainer>
-    ),
-  }),
-  ...ProjectRouterWrapper({
-    path: projectSettingsRoutes.general,
-    element: (
-      <DashboardContainer>
-        <PageTitle title="General">
-          <ProjectSettingsLayout>
-            <GeneralPage />
-          </ProjectSettingsLayout>
-        </PageTitle>
-      </DashboardContainer>
-    ),
-  }),
+
   ...ProjectRouterWrapper({
     path: projectSettingsRoutes.pieces,
     element: (
@@ -390,7 +378,7 @@ const routes = [
   }),
 
   ...ProjectRouterWrapper({
-    path: '/mcp',
+    path: '/mcps',
     element: (
       <DashboardContainer>
         <RoutePermissionGuard permission={Permission.READ_MCP}>
@@ -402,7 +390,7 @@ const routes = [
     ),
   }),
   ...ProjectRouterWrapper({
-    path: '/mcp/:mcpId',
+    path: '/mcps/:mcpId',
     element: (
       <DashboardContainer>
         <RoutePermissionGuard permission={Permission.READ_MCP}>
@@ -422,7 +410,6 @@ const routes = [
       </PageTitle>
     ),
   },
-
   {
     path: '/404',
     element: (
@@ -570,6 +557,26 @@ const routes = [
       <PlatformAdminContainer>
         <PageTitle title="Billing">
           <SettingsBilling />
+        </PageTitle>
+      </PlatformAdminContainer>
+    ),
+  },
+  {
+    path: '/platform/setup/billing/success',
+    element: (
+      <PlatformAdminContainer>
+        <PageTitle title="Billing">
+          <Success />
+        </PageTitle>
+      </PlatformAdminContainer>
+    ),
+  },
+  {
+    path: '/platform/setup/billing/error',
+    element: (
+      <PlatformAdminContainer>
+        <PageTitle title="Billing">
+          <Error />
         </PageTitle>
       </PlatformAdminContainer>
     ),
